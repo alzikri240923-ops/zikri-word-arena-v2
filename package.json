@@ -1,0 +1,15 @@
+{
+  "name": "zikri-word-arena",
+  "version": "2.7.0",
+  "description": "ZIKRI WORD ARENA - Persistent Player Profiles and National Leaderboard",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "socket.io": "^4.8.1"
+  },
+  "author": "AFDALZIKRI",
+  "license": "UNLICENSED"
+}

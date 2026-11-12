@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#080d19">
+  <title>ZIKRI WORD ARENA — Multiplayer Word Battle</title>
+  <script src="/socket.io/socket.io.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+    :root{--bg:#080d19;--panel:#101a2c;--panel2:#16243a;--line:#293b57;--gold:#f3c66a;--gold2:#ffe4a2;--text:#f5f7fc;--muted:#94a5bd;--green:#43d6a0;--red:#ff777d;--blue:#69a9ff;--shadow:0 18px 55px #0005}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -15%,#243c60 0,transparent 48%),radial-gradient(circle at 95% 45%,#152949 0,transparent 28%),var(--bg);color:var(--text);font-family:'DM Sans',Arial,sans-serif}
+    button,input{font:inherit}button{border:0;cursor:pointer;transition:transform .18s,filter .18s,background .18s}button:hover{filter:brightness(1.08);transform:translateY(-1px)}button:active{transform:translateY(0)}button:disabled{opacity:.45;cursor:not-allowed;transform:none}
+    .shell{width:min(1120px,94%);margin:auto;padding:28px 0 34px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:24px}.brand{display:flex;align-items:center;gap:12px}.brand-mark{width:46px;height:46px;display:grid;place-items:center;border-radius:14px;background:linear-gradient(145deg,#ffe4a2,#d99b35);color:#1b1b1b;font:800 22px 'Space Grotesk';box-shadow:0 8px 25px #e6b95735}.brand-name{font:700 clamp(17px,3vw,23px) 'Space Grotesk';letter-spacing:.6px}.brand-sub{font-size:11px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase}.online-pill,.tiny-pill{border:1px solid #315344;background:#102c28;color:#8ce7c1;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700;white-space:nowrap}.hero{text-align:center;margin:28px 0 26px}.eyebrow{color:var(--gold);font-size:11px;font-weight:800;letter-spacing:3px;text-transform:uppercase}.hero h1{font:700 clamp(31px,7vw,58px)/1.05 'Space Grotesk';letter-spacing:-2px;margin:12px 0}.hero h1 span{color:var(--gold)}.hero p{color:var(--muted);margin:0;font-size:14px}.panel{background:linear-gradient(145deg,#142239f2,#0e1728f5);border:1px solid #30425d;border-radius:22px;padding:clamp(17px,3vw,25px);box-shadow:var(--shadow);margin-bottom:16px;backdrop-filter:blur(12px)}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}.panel h2,.panel h3{margin:0}.panel h2{font:700 20px 'Space Grotesk'}.panel h3{font-size:16px}.muted{color:var(--muted)}.small{font-size:12px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{min-width:0}.field label{display:block;color:#b9c6d8;font-size:12px;font-weight:700;margin:0 0 7px}.field input,.chat-input,.answer-input{width:100%;border:1px solid #354967;border-radius:12px;background:#091323;color:white;padding:14px 15px;outline:none;transition:border .2s,box-shadow .2s}.field input:focus,.chat-input:focus,.answer-input:focus{border-color:var(--gold);box-shadow:0 0 0 3px #f3c66a18}.field input::placeholder,.chat-input::placeholder,.answer-input::placeholder{color:#71829a}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}.btn{padding:13px 18px;border-radius:12px;font-weight:800}.btn-primary{background:linear-gradient(135deg,#ffe19a,#e6b34f);color:#241b0b;box-shadow:0 8px 22px #dca43c26}.btn-secondary{background:#233650;color:#eaf1fb;border:1px solid #3a5273}.btn-ghost{background:transparent;border:1px solid #3a5273;color:#c9d6e8}.btn-block{width:100%}.status{min-height:20px;margin-top:12px;color:var(--muted);font-size:13px}.status.error{color:var(--red)}.join-box{margin-top:16px;padding-top:16px;border-top:1px solid #293b57}.hidden{display:none!important}.feature-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:15px}.profile-display{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;margin-bottom:13px;border:1px solid #3b654f;background:#10271f;border-radius:13px}.profile-name{font-weight:800;color:#a8f0cd}.leaderboard{margin-top:20px;padding-top:18px;border-top:1px solid #293b57}.leaderboard-list{display:grid;gap:7px;margin-top:12px}.leader-row{display:grid;grid-template-columns:34px minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:10px 12px;background:#101d30;border:1px solid #293c59;border-radius:11px;font-size:12px}.leader-row.mine{border-color:#9b7a3e;background:#292417}.leader-rank{font-weight:900;color:var(--gold)}.leader-name{font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.leader-stat{color:var(--muted);white-space:nowrap}.leader-points{color:var(--gold2);font-weight:800;white-space:nowrap}.feature{border:1px solid #293c59;background:#101d30;border-radius:14px;padding:12px}.feature strong{display:block;font-size:13px}.feature span{font-size:11px;color:var(--muted)}
+    .room-top{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap}.room-code{font:700 clamp(30px,7vw,42px) 'Space Grotesk';letter-spacing:7px;color:var(--gold2);margin:5px 0}.copy-btn{background:#263b57;color:#e7eef9;border:1px solid #3b5272;border-radius:10px;padding:10px 13px;font-size:12px;font-weight:800}.player-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px}.player-card{display:flex;align-items:center;gap:10px;background:#111f33;border:1px solid #2b3f5c;border-radius:14px;padding:11px;min-width:0}.avatar{width:37px;height:37px;flex:0 0 37px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(145deg,#315b83,#1c3553);color:#d9eaff;font-weight:900}.player-info{min-width:0}.player-info strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}.player-info small{color:var(--muted);font-size:10px}.host-tag{color:var(--gold);font-weight:800}.lobby-layout{display:grid;grid-template-columns:1.15fr .85fr;gap:15px}.chat-box{height:205px;overflow:auto;background:#091323;border:1px solid #2a3d59;border-radius:13px;padding:10px;display:flex;flex-direction:column;gap:8px}.chat-line{font-size:12px;line-height:1.4;overflow-wrap:anywhere}.chat-line b{color:var(--gold2)}.chat-line.system{color:#8da0b8;font-style:italic}.chat-form{display:flex;gap:7px;margin-top:8px}.chat-input{padding:10px 12px;font-size:12px;min-width:0}.chat-send{border-radius:10px;padding:0 14px;background:#2b4364;color:white;font-weight:800}
+    .game-layout{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(280px,.7fr);gap:15px;align-items:start}.game-main,.game-side{min-width:0}.game-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}.timer{font:700 30px 'Space Grotesk';color:var(--gold2);font-variant-numeric:tabular-nums}.timer.low{color:var(--red);animation:pulse 1s infinite}.progress-track{height:7px;border-radius:99px;background:#26364d;overflow:hidden;margin-top:14px}.progress-fill{height:100%;width:0;background:linear-gradient(90deg,#4ad8a5,#f3c66a);border-radius:99px;transition:width .35s}.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:15px}.stat{background:#0b1627;border:1px solid #263a56;border-radius:13px;padding:11px}.stat strong{display:block;font:700 20px 'Space Grotesk';color:var(--gold2)}.stat span{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px}.board-wrap{overflow-x:auto;padding:8px 0 3px}.board{display:grid;grid-template-columns:repeat(9,minmax(30px,44px));gap:4px;width:max-content;margin:8px auto}.cell{width:100%;aspect-ratio:1;border-radius:7px;background:linear-gradient(145deg,#284365,#1c304b);border:1px solid #3b5778;display:grid;place-items:center;font:800 15px 'Space Grotesk';color:#eaf3ff;transition:background .25s,transform .25s}.cell.empty{background:#091323;border:1px solid #18283e}.cell.solved{background:linear-gradient(145deg,#1a9871,#11634e);border-color:#4bd5a2;color:white;box-shadow:0 0 12px #31c48d26}.clues{display:grid;gap:8px}.clue{border:1px solid #2b3f5b;background:#111f33;border-radius:13px;padding:12px;display:flex;align-items:center;gap:10px}.clue.done{border-color:#247c62;background:#102c29}.clue-num{width:29px;height:29px;flex:0 0 29px;border-radius:9px;background:#293f5c;color:var(--gold2);display:grid;place-items:center;font-size:11px;font-weight:900}.clue-text{flex:1;min-width:0;font-size:12px;line-height:1.4}.clue button{background:#2a4262;color:#f2f6fc;padding:8px 11px;border-radius:9px;font-size:11px;font-weight:800}.clue.done button{background:transparent;color:var(--green);padding:5px}.answer-card{margin-top:13px;padding:14px;background:#091323;border:1px solid #2b3d59;border-radius:15px}.selected-clue{font-size:12px;color:#c5d2e4;margin-bottom:10px}.answer-row{display:flex;gap:8px}.answer-input{min-width:0;text-transform:uppercase;padding:12px}.score-list{display:grid;gap:8px}.score-item{display:flex;align-items:center;gap:10px;background:#111f33;border:1px solid #2a3d58;border-radius:12px;padding:10px}.rank{width:26px;height:26px;border-radius:8px;background:#293d59;display:grid;place-items:center;font-size:11px;font-weight:900}.score-name{flex:1;min-width:0;font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.score-value{font:700 14px 'Space Grotesk';color:var(--gold2)}.score-item.first{border-color:#96763d;background:#2a251a}.score-item.first .rank{background:#e7b954;color:#241b0b}.announcement{position:fixed;left:50%;top:18px;transform:translate(-50%,-130%);opacity:0;z-index:20;background:#142a29;border:1px solid #3ab88c;color:#baf6dc;padding:12px 18px;border-radius:14px;box-shadow:var(--shadow);font-size:13px;font-weight:800;transition:all .3s;max-width:90%;text-align:center}.announcement.show{transform:translate(-50%,0);opacity:1}.result-hero{text-align:center;padding:15px 0 22px}.trophy{font-size:48px;filter:drop-shadow(0 8px 18px #e5b74b45)}.winner{font:700 clamp(22px,5vw,32px) 'Space Grotesk';color:var(--gold2);margin:8px 0}.result-list{display:grid;gap:9px;max-width:600px;margin:15px auto}.result-row{display:flex;align-items:center;gap:12px;background:#111f33;border:1px solid #2b405e;border-radius:14px;padding:13px}.result-row:first-child{border-color:#a37e3d;background:#2b261b}.result-rank{font:700 20px 'Space Grotesk';color:var(--gold)}.result-name{flex:1;font-weight:800}.result-score{font:700 16px 'Space Grotesk';color:var(--gold2)}footer{text-align:center;color:#64758e;font-size:11px;line-height:1.8;padding:18px 5px}
+    @keyframes pulse{50%{opacity:.55}}@media(max-width:760px){.lobby-layout,.game-layout{grid-template-columns:1fr}.game-side{display:grid;grid-template-columns:1fr 1fr;gap:12px}.game-side .panel{margin:0}.topbar{margin-bottom:15px}.hero{margin:20px 0}.shell{padding-top:18px}}@media(max-width:480px){.leader-row{grid-template-columns:28px minmax(0,1fr) auto}.leader-points{grid-column:2/4;text-align:right}.form-grid{grid-template-columns:1fr}.feature-strip{gap:7px}.feature{padding:9px}.feature strong{font-size:11px}.feature span{font-size:10px}.game-side{grid-template-columns:1fr}.board{grid-template-columns:repeat(9,32px);gap:3px}.cell{font-size:12px;border-radius:5px}.timer{font-size:25px}.room-top{align-items:flex-start}.actions .btn{flex:1}.answer-row{flex-direction:column}.answer-row .btn{width:100%}}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <div class="topbar">
+    <div class="brand"><div class="brand-mark">ZW</div><div><div class="brand-name">ZIKRI WORD ARENA</div><div class="brand-sub">Multiplayer word battle</div></div></div>
+    <div class="online-pill">● LIVE ARENA</div>
+  </div>
+
+  <header class="hero" id="hero">
+    <div class="eyebrow">Think fast · Play smart</div>
+    <h1>WORD <span>ARENA</span></h1>
+    <p>Asah kecepatan berpikir, kumpulkan poin, dan jadilah juara!</p>
+  </header>
+
+  <section id="home" class="panel">
+    <div class="panel-head"><div><div class="eyebrow">Masuk ke permainan</div><h2 style="margin-top:5px">Siap masuk arena?</h2></div><span class="tiny-pill">2–10 PEMAIN</span></div>
+    <div id="nameEntry" class="field"><label for="playerName">NAMA PEMAIN (CUKUP SEKALI)</label><input id="playerName" maxlength="16" placeholder="Masukkan nama kamu" autocomplete="nickname"><button class="btn btn-secondary" onclick="savePlayerName()">Simpan Nama</button></div>
+    <div id="profileDisplay" class="profile-display hidden"><div><div class="muted small">PROFIL PEMAIN TERSIMPAN</div><div class="profile-name" id="savedPlayerName">Pemain</div></div><button class="btn btn-ghost" onclick="editPlayerName()">✎ Ganti Nama</button></div>
+    <div class="actions"><button class="btn btn-primary" onclick="createRoom()">＋ Buat Room</button><button class="btn btn-secondary" onclick="toggleJoin()">Gabung Room</button></div>
+    <div id="joinArea" class="join-box hidden"><div class="field"><label for="roomInput">KODE ROOM</label><input id="roomInput" maxlength="6" placeholder="Contoh: A1B2C3" autocapitalize="characters"></div><button class="btn btn-primary btn-block" onclick="joinRoom()">Masuk ke Arena →</button></div>
+    <div id="homeStatus" class="status"></div>
+    <div class="feature-strip"><div class="feature"><strong>⚡ 3 Menit</strong><span>Balapan lawan waktu</span></div><div class="feature"><strong>🏆 Live Ranking</strong><span>Kejar skor tertinggi</span></div><div class="feature"><strong>👥 10 Pemain</strong><span>Main bareng teman</span></div></div>
+    <div class="leaderboard"><div class="panel-head"><div><div class="eyebrow">Leaderboard global</div><h3 style="margin-top:4px">🇮🇩 Peringkat Indonesia</h3></div><span class="tiny-pill">TOP 10</span></div><div id="nationalLeaderboard" class="leaderboard-list"><div class="muted small">Memuat peringkat pemain...</div></div><p class="muted small">Peringkat diperbarui setelah pertandingan selesai dan saat nama pemain diganti.</p></div>
+  </section>
+
+  <section id="lobby" class="panel hidden">
+    <div class="room-top"><div><div class="eyebrow">Waiting room</div><h2>Ruang Tunggu</h2><div class="muted small">Bagikan kode untuk mengundang teman.</div></div><div><div class="room-code" id="roomCode">------</div><button class="copy-btn" onclick="copyRoomCode()">▣ Salin Kode</button></div></div>
+    <div class="lobby-layout" style="margin-top:22px">
+      <div><div class="panel-head"><h3>Pemain di arena</h3><span class="tiny-pill" id="playerCount">1 / 10</span></div><div id="lobbyPlayers" class="player-grid"></div><p id="lobbyStatus" class="status">Menunggu pemain lain...</p><button id="startButton" class="btn btn-primary btn-block hidden" onclick="startGame()">Mulai Pertandingan →</button><button class="btn btn-ghost btn-block" onclick="leaveRoom()" style="margin-top:8px">Keluar Room</button></div>
+      <div><div class="panel-head"><h3>💬 Chat Arena</h3><span class="muted small">Live chat</span></div><div id="lobbyChat" class="chat-box"></div><form class="chat-form" onsubmit="sendChat(event,'lobbyChatInput')"><input id="lobbyChatInput" class="chat-input" maxlength="120" placeholder="Tulis pesan..." autocomplete="off"><button class="chat-send">Kirim</button></form></div>
+    </div>
+  </section>
+
+  <section id="game" class="hidden">
+    <div class="panel">
+      <div class="game-heading"><div><div class="eyebrow">Live match</div><h2 style="margin-top:4px">Arena Pertandingan</h2><div class="muted small">Selesaikan kata sebanyak mungkin sebelum waktu habis.</div></div><div style="text-align:right"><div class="timer" id="timer">03:00</div><div class="muted" style="font-size:10px">SISA WAKTU</div></div></div>
+      <div class="progress-track"><div id="timeProgress" class="progress-fill"></div></div>
+      <div class="stats-row"><div class="stat"><strong id="solvedCount">0/9</strong><span>Kata selesai</span></div><div class="stat"><strong id="myScore">0</strong><span>Skor kamu</span></div><div class="stat"><strong id="myRank">-</strong><span>Peringkat</span></div></div>
+    </div>
+    <div class="game-layout">
+      <div class="game-main">
+        <div class="panel"><div class="panel-head"><h3>🧩 Papan Kata</h3><span class="muted small">Hijau = terjawab</span></div><div class="board-wrap"><div id="board" class="board"></div></div></div>
+        <div class="panel"><div class="panel-head"><h3>Daftar Pertanyaan</h3><span class="muted small">Pilih untuk menjawab</span></div><div id="clues" class="clues"></div><div class="answer-card"><div id="selectedClue" class="selected-clue">Pilih pertanyaan terlebih dahulu.</div><div class="answer-row"><input id="answerInput" class="answer-input" placeholder="Ketik jawaban..." autocomplete="off"><button class="btn btn-primary" onclick="submitAnswer()">Kirim Jawaban</button></div><div id="answerStatus" class="status"></div></div></div>
+      </div>
+      <aside class="game-side">
+        <div class="panel"><div class="panel-head"><h3>🏆 Papan Skor</h3><span class="muted small">Live</span></div><div id="gamePlayers" class="score-list"></div></div>
+        <div class="panel"><div class="panel-head"><h3>💬 Chat</h3></div><div id="gameChat" class="chat-box"></div><form class="chat-form" onsubmit="sendChat(event,'gameChatInput')"><input id="gameChatInput" class="chat-input" maxlength="120" placeholder="Tulis pesan..." autocomplete="off"><button class="chat-send">➤</button></form></div>
+      </aside>
+    </div>
+  </section>
+
+  <section id="result" class="panel hidden"><div class="result-hero"><div class="trophy">🏆</div><div class="eyebrow">Match complete</div><div class="winner" id="winnerText">Pertandingan selesai</div><div class="muted small">Inilah hasil akhir pertandingan.</div></div><h3 style="text-align:center">Peringkat Pemain</h3><div id="ranking" class="result-list"></div><div class="actions" style="justify-content:center"><button class="btn btn-primary" onclick="backHome()">Kembali ke Beranda</button></div></section>
+
+  <footer>ZIKRI WORD ARENA · Developed by <b>AFDALZIKRI</b><br>© 2026 AFDALZIKRI. All Rights Reserved.</footer>
+</div>
+<div id="announcement" class="announcement"></div>
+<script>
+  const socket = io();
+  const WORDS = [
+    {id:"w1",answer:"IKAN",clue:"Hewan yang hidup di air.",r:0,c:4},
+    {id:"w2",answer:"NASI",clue:"Makanan pokok yang berasal dari beras.",r:1,c:4},
+    {id:"w3",answer:"DUNIA",clue:"Bumi dan segala isinya disebut...",r:2,c:4},
+    {id:"w4",answer:"OBAT",clue:"Sesuatu yang digunakan untuk mengatasi penyakit.",r:3,c:4},
+    {id:"w5",answer:"NAGA",clue:"Makhluk legenda yang menyerupai reptil besar.",r:4,c:4},
+    {id:"w6",answer:"EMAS",clue:"Logam mulia berwarna kuning.",r:5,c:4},
+    {id:"w7",answer:"SAPI",clue:"Hewan ternak yang menghasilkan susu.",r:6,c:4},
+    {id:"w8",answer:"IKLIM",clue:"Keadaan cuaca rata-rata dalam waktu panjang.",r:7,c:4},
+    {id:"w9",answer:"AIR",clue:"Cairan yang dibutuhkan manusia untuk hidup.",r:8,c:4}
+  ];
+  let myName="",currentRoom="",selectedWord=null,roomState=null,toastTimer=null,profileReady=false;
+  const PROFILE_KEY="zwa_profile_token_v1";
+  const $=id=>document.getElementById(id);
+  function show(id){["home","lobby","game","result"].forEach(x=>$(x).classList.toggle("hidden",x!==id));$("hero").classList.toggle("hidden",id!=="home");}
+  function toggleJoin(){$("joinArea").classList.toggle("hidden");if(!$("joinArea").classList.contains("hidden"))$("roomInput").focus();}
+  function setHomeStatus(message,error=true){$("homeStatus").textContent=message;$("homeStatus").classList.toggle("error",error);}
+  function updateProfileUI(){
+    $("savedPlayerName").textContent=myName;
+    $("profileDisplay").classList.toggle("hidden",!myName);
+    $("nameEntry").classList.toggle("hidden",!!myName&&!isEditingName);
+    if(myName&&!isEditingName)$("playerName").value=myName;
+  }
+  let isEditingName=false;
+  function editPlayerName(){isEditingName=true;$("nameEntry").classList.remove("hidden");$("profileDisplay").classList.add("hidden");$("playerName").value=myName;$("playerName").focus();}
+  function savePlayerName(afterSave){
+    const nextName=$("playerName").value.trim();
+    if(nextName.length<2)return setHomeStatus("Nama minimal 2 karakter.");
+    if(!profileReady)return setHomeStatus("Profil sedang disiapkan. Coba sebentar lagi.");
+    socket.emit("profile:set-name",nextName,res=>{
+      if(!res?.ok)return setHomeStatus(res?.message||"Nama gagal disimpan.");
+      myName=res.name;isEditingName=false;updateProfileUI();setHomeStatus("Nama berhasil disimpan. Berikutnya kamu tidak perlu memasukkannya lagi.",false);toast("Profil diperbarui: "+myName);
+      if(typeof afterSave==="function")afterSave();
+    });
+  }
+  function withPlayerName(action){
+    if(!profileReady)return setHomeStatus("Menghubungkan profil pemain...");
+    if(myName&&!isEditingName)return action();
+    savePlayerName(action);
+  }
+  function createRoom(){withPlayerName(()=>{socket.emit("create-room",{},res=>{if(!res?.ok)return setHomeStatus(res?.message||"Gagal membuat room.");currentRoom=res.code;show("lobby");});});}
+  function joinRoom(){const code=$("roomInput").value.trim().toUpperCase();if(!code)return setHomeStatus("Masukkan kode room.");withPlayerName(()=>{socket.emit("join-room",{code},res=>{if(!res?.ok)return setHomeStatus(res?.message||"Gagal masuk room.");currentRoom=res.code;show("lobby");});});}
+  function startGame(){socket.emit("start-game",currentRoom,res=>{if(!res?.ok)alert(res?.message||"Tidak bisa memulai pertandingan.");});}
+  function leaveRoom(){socket.emit("leave-room");currentRoom="";selectedWord=null;show("home");}
+  function backHome(){leaveRoom();}
+  async function copyRoomCode(){try{await navigator.clipboard.writeText(currentRoom);toast("Kode room berhasil disalin!");}catch(e){toast("Kode room: "+currentRoom);}}
+  function toast(message){const el=$("announcement");el.textContent=message;el.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove("show"),2600);}
+  function initials(name){return String(name||"?").trim().slice(0,2).toUpperCase();}
+  function playerCard(p){return `<div class="player-card"><div class="avatar">${escapeHTML(initials(p.name))}</div><div class="player-info"><strong>${escapeHTML(p.name)} ${p.id===socket.id?"(Kamu)":""}</strong><small>${p.isHost?'<span class="host-tag">★ HOST</span>':"PEMAIN"}</small></div></div>`;}
+  socket.on("room:update",state=>{
+    roomState=state;$("roomCode").textContent=state.code;$("playerCount").textContent=`${state.players.length} / ${state.maxPlayers||10}`;
+    $("lobbyPlayers").innerHTML=state.players.map(playerCard).join("");
+    const me=state.players.find(p=>p.id===socket.id);
+    $("startButton").classList.toggle("hidden",!me||!me.isHost||state.status!=="waiting");
+    $("lobbyStatus").textContent=state.players.length<2?"Butuh minimal 2 pemain untuk memulai.":(state.players.length===10?"Room penuh! Host siap memulai.":"Pemain siap. Host dapat memulai pertandingan.");
+    if(state.status==="playing"){show("game");renderGame(state);}
+    if(state.status==="finished"){show("result");renderResult(state);}
+  });
+  socket.on("game:tick",seconds=>{const m=Math.floor(seconds/60),s=seconds%60;$("timer").textContent=String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");$("timer").classList.toggle("low",seconds<=20);$("timeProgress").style.width=Math.max(0,seconds/180*100)+"%";});
+  socket.on("answer:result",res=>{$("answerStatus").textContent=res.message;$("answerStatus").classList.toggle("error",!res.ok);if(res.ok){$("answerInput").value="";toast("+"+(res.points||10)+" POIN! Jawaban benar");}});
+  socket.on("game:announcement",data=>{if(data.name!==myName)toast(`${data.name} menemukan ${data.wordId.toUpperCase()} · +${data.points} poin`);});
+  socket.on("chat:message",msg=>{["lobbyChat","gameChat"].forEach(id=>{const box=$(id);if(!box)return;const line=document.createElement("div");line.className="chat-line"+(msg.system?" system":"");if(msg.system)line.textContent=msg.message;else{const b=document.createElement("b");b.textContent=msg.name+": ";line.appendChild(b);line.appendChild(document.createTextNode(msg.message));}box.appendChild(line);while(box.children.length>45)box.removeChild(box.firstChild);box.scrollTop=box.scrollHeight;});});
+  function sendChat(event,inputId){event.preventDefault();const input=$(inputId),value=input.value.trim();if(!value)return;socket.emit("chat:send",value);input.value="";}
+  function renderGame(state){renderBoard(state.solved||[]);renderClues(state.solved||[]);renderScores(state.players||[]);$("solvedCount").textContent=`${(state.solved||[]).length}/9`;const sorted=state.players.slice().sort((a,b)=>b.score-a.score);const me=sorted.find(p=>p.id===socket.id);$("myScore").textContent=me?.score||0;$("myRank").textContent=me?`#${sorted.findIndex(p=>p.id===socket.id)+1}`:"-";}
+  function renderBoard(solved){const cells=Array.from({length:9},()=>Array(9).fill(""));const vertical="INDONESIA";for(let r=0;r<vertical.length;r++)cells[r][4]=vertical[r];WORDS.forEach(w=>{for(let i=0;i<w.answer.length;i++)cells[w.r][w.c+i]=w.answer[i];});const set=new Set(solved);$("board").innerHTML="";for(let r=0;r<9;r++)for(let c=0;c<9;c++){const cell=document.createElement("div");cell.className="cell";if(!cells[r][c])cell.classList.add("empty");else{const matching=WORDS.find(w=>w.r===r&&c>=w.c&&c<w.c+w.answer.length);const isSolved=(matching&&set.has(matching.id))||(c===4&&set.size===9);if(isSolved){cell.textContent=cells[r][c];cell.classList.add("solved");}}$("board").appendChild(cell);}}
+  function renderClues(solved){$("clues").innerHTML=WORDS.map((w,i)=>{const done=solved.includes(w.id);return `<div class="clue ${done?"done":""}"><div class="clue-num">${String(i+1).padStart(2,"0")}</div><div class="clue-text">${escapeHTML(w.clue)}</div>${done?'<button disabled>✓</button>':`<button onclick="selectWord('${w.id}')">Jawab</button>`}</div>`;}).join("");}
+  function selectWord(id){selectedWord=WORDS.find(w=>w.id===id);$("selectedClue").textContent=selectedWord.clue;$("answerInput").value="";$("answerInput").focus();$("answerStatus").textContent="";}
+  function submitAnswer(){if(!selectedWord){$("answerStatus").textContent="Pilih pertanyaan terlebih dahulu.";return;}const answer=$("answerInput").value.trim().toUpperCase();if(!answer){$("answerStatus").textContent="Ketik jawaban terlebih dahulu.";return;}socket.emit("submit-answer",{room:currentRoom,wordId:selectedWord.id,answer});}
+  function renderScores(players){const sorted=players.slice().sort((a,b)=>b.score-a.score);$("gamePlayers").innerHTML=sorted.map((p,i)=>`<div class="score-item ${i===0?"first":""}"><div class="rank">${i===0?"★":i+1}</div><div class="score-name">${escapeHTML(p.name)}${p.id===socket.id?" · Kamu":""}</div><div class="score-value">${p.score}</div></div>`).join("");}
+  function renderResult(state){const sorted=state.players.slice().sort((a,b)=>b.score-a.score);$("winnerText").textContent=sorted.length?`Pemenang: ${sorted[0].name}`:"Pertandingan selesai";$("ranking").innerHTML=sorted.map((p,i)=>`<div class="result-row"><div class="result-rank">${i===0?"🏆":i+1}</div><div class="result-name">${escapeHTML(p.name)}${p.id===socket.id?" (Kamu)":""}</div><div class="result-score">${p.score} poin</div></div>`).join("");}
+  function escapeHTML(value){return String(value).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"})[ch]);}
+  $("answerInput").addEventListener("keydown",e=>{if(e.key==="Enter")submitAnswer();});
+  $("roomInput").addEventListener("input",e=>{e.target.value=e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,"");});
+  function renderNationalLeaderboard(rows){
+    if(!rows||!rows.length){$("nationalLeaderboard").innerHTML='<div class="muted small">Belum ada data peringkat. Jadilah pemain pertama!</div>';return;}
+    $("nationalLeaderboard").innerHTML=rows.slice(0,10).map((p,i)=>`<div class="leader-row ${p.name===myName?"mine":""}"><div class="leader-rank">${i===0?"🥇":i===1?"🥈":i===2?"🥉":"#"+(i+1)}</div><div class="leader-name">${escapeHTML(p.name)}${p.name===myName?" · Kamu":""}</div><div class="leader-stat">${p.wins} menang</div><div class="leader-points">${p.totalPoints} pt</div></div>`).join("");
+  }
+  socket.on("leaderboard:update",renderNationalLeaderboard);
+  socket.on("connect",()=>{
+    profileReady=false;
+    let token="";try{token=localStorage.getItem(PROFILE_KEY)||"";}catch(e){}
+    socket.emit("profile:load",token,profile=>{
+      if(!profile?.ok)return setHomeStatus("Profil gagal dimuat. Muat ulang halaman.");
+      try{localStorage.setItem(PROFILE_KEY,profile.token);}catch(e){}
+      myName=profile.name||"";profileReady=true;isEditingName=false;updateProfileUI();
+      socket.emit("leaderboard:get");
+      if(myName)setHomeStatus("Selamat datang kembali, "+myName+"!",false);
+    });
+  });
+  socket.on("connect_error",()=>setHomeStatus("Tidak dapat terhubung ke server. Periksa koneksi dan server."));
+</script>
+</body>
+</html>
